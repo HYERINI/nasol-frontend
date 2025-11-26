@@ -4,6 +4,13 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
+// 쿠키 설정 헬퍼 함수
+function setCookie(name: string, value: string, days: number = 1) {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+}
+
 interface Summary {
     total_income: number;
     total_expense: number;
@@ -44,6 +51,13 @@ export default function ResultPage() {
     const [error, setError] = useState<string>("");
 
     useEffect(() => {
+        // 페이지 로드 시 기존 session_id를 쿠키로 복원
+        const savedSessionId = localStorage.getItem("session_id");
+        if (savedSessionId) {
+            setCookie("session_id", savedSessionId, 1);
+            console.log("[DEBUG] Restored session_id to cookie:", savedSessionId);
+        }
+        
         fetchResult();
     }, []);
 
